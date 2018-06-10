@@ -4,3 +4,7 @@ Após o recebimento desse PDF e do CPF, o serviço gera uma chave HASH que inclu
 - CPF
 - Data/hora da chamada ao webservice
 - IP do usuário que chamou o serviço
+
+Para o correto funcionamento da aplicação a propriedade "arquivos.assinados.path" do arquivo "application.properties" deve apontar para
+um diretório onde seja possível realizar operações de escrita. Essa propriedade aponta para o diretório onde ficarão armazenados
+os arquivos assinados com o hash.
