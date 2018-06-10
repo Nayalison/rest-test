@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.itextpdf.text.BaseColor;
@@ -23,11 +24,20 @@ import br.com.nayalison.resttest.assinador.AssinadorHash;
 import br.com.nayalison.resttest.exception.AssinaturaException;
 import br.com.nayalison.resttest.service.util.FileUtil;
 
+/**
+ * Classe responsável por assinar arquivos do tipo PDF
+ * 
+ * @author nayalison
+ *
+ */
 @Component
 public class AssinadorDePdf  implements AssinadorHash {
 	
 	private static final Logger logger = LoggerFactory.getLogger(FileUtil.class);
 	private static final String MENSAGEM_ERRO = "Falha ao assinar o PDF com o hash";
+	
+	@Value("${arquivos.assinados.path}")
+	private String arquivosAssinadoPath;
 
 	@Override
 	public void assinar(String hash, File arquivoOriginal) throws AssinaturaException {
@@ -35,18 +45,30 @@ public class AssinadorDePdf  implements AssinadorHash {
 		 File arquivoFinal = new File(caminhoArquivoFinal);
 	     arquivoFinal.getParentFile().mkdirs();
 	     try {
-			createPdf(arquivoOriginal, arquivoFinal, hash);
+			criarRodape(arquivoOriginal, arquivoFinal, hash);
 		} catch (IOException | DocumentException e) {
 			logger.error(MENSAGEM_ERRO, e);
 			throw new AssinaturaException(MENSAGEM_ERRO);
 		}
 	}
 
-	private String getDiretorioDestino() {
-		return "/home/nayalison/teste";
+	private String getDiretorioDestino() throws AssinaturaException {
+		if(arquivosAssinadoPath == null) {
+			throw new AssinaturaException("Apropriedade arquivos.assinados.path deve ser configurada no arquivo application.properties");
+		}
+		return arquivosAssinadoPath;
 	}
 	
-	public void createPdf(File arquivoOriginal, File arquivoFinal, String hash) throws IOException, DocumentException {
+	/**
+	 * Método responsável por criar um rodapé no arquivo pasado por parâmetro
+	 * 
+	 * @param arquivoOriginal arquivo original
+	 * @param arquivoFinal arquivo com as alterações
+	 * @param hash hash que será inserido no arquivo
+	 * @throws IOException
+	 * @throws DocumentException
+	 */
+	public void criarRodape(File arquivoOriginal, File arquivoFinal, String hash) throws IOException, DocumentException {
 		Document document = new Document(); 
 
 		PdfCopy copy = new PdfCopy(document, new FileOutputStream(arquivoFinal));
@@ -57,12 +79,12 @@ public class AssinadorDePdf  implements AssinadorHash {
 
 		PdfImportedPage page;
 		PdfCopy.PageStamp stamp;
-		Font ffont = new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.ITALIC, BaseColor.BLACK);
+		Font ffont = new Font(Font.FontFamily.UNDEFINED, 10, Font.BOLD, BaseColor.BLACK);
 
 		for (int i = 0; i < n1; ) {
 		    page = copy.getImportedPage(reader1, ++i);
 		    stamp = copy.createPageStamp(page);
-		    ColumnText.showTextAligned(stamp.getUnderContent(), Element.ALIGN_CENTER,new Phrase(hash, ffont),297.5f, 28, 0);
+		    ColumnText.showTextAligned(stamp.getOverContent(), Element.ALIGN_CENTER,new Phrase(hash, ffont),297.5f, 28, 0);
 		    stamp.alterContents();
 		    copy.addPage(page);
 		}

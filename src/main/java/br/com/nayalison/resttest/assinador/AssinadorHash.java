@@ -4,6 +4,12 @@ import java.io.File;
 
 import br.com.nayalison.resttest.exception.AssinaturaException;
 
+/**
+ * Abstração de classes capazes de assinar uma arquivo com um hash.
+ * 
+ * @author nayalison
+ *
+ */
 public interface AssinadorHash {
 	
 	/**

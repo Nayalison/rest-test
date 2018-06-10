@@ -12,19 +12,36 @@ import org.springframework.web.multipart.MultipartFile;
 
 import br.com.nayalison.resttest.exception.AssinaturaException;
 
+/**
+ * Classe utilitária para manipulação de arquivos.
+ * 
+ * @author nayalison
+ *
+ */
 public class FileUtil {
 	
 	private static final String ARQUIVO_NAO_ENCONTRADO = "Não foi possível encontrar o arquivo";
 	private static final String FALHA_AO_MANIPULAR_O_ARQUIVO = "Falha ao manipular o arquivo";
 	private static final Logger logger = LoggerFactory.getLogger(FileUtil.class);
 	
+	/**
+	 * Método responsável por obter o diretório temporário.
+	 * 
+	 * @return diretório temporário
+	 */
 	public static String getTempDir(){
         String property = "java.io.tmpdir";
-
         String tempDir = System.getProperty(property);
         return tempDir;
     }
 	
+	/**
+	 * Método responsável por copiar o conteúdo de um {@link MultipartFile} para o diretório temporário.
+	 * 
+	 * @param file conteúdo que será copiado
+	 * @return arquivo copiado para o diretório temporário
+	 * @throws AssinaturaException
+	 */
 	public static final File copiarArquivoParaDiretorioTemporario(MultipartFile file) throws AssinaturaException {
 		File saveFile = new File(getTempDir(), file.getOriginalFilename());
 		FileOutputStream output = null;
