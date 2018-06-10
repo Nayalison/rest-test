@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,6 +47,7 @@ public class AssinadorDePdf  implements AssinadorHash {
 	     arquivoFinal.getParentFile().mkdirs();
 	     try {
 			criarRodape(arquivoOriginal, arquivoFinal, hash);
+			FileUtils.forceDelete(arquivoOriginal);
 		} catch (IOException | DocumentException e) {
 			logger.error(MENSAGEM_ERRO, e);
 			throw new AssinaturaException(MENSAGEM_ERRO);
