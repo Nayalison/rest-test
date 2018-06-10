@@ -39,11 +39,12 @@ public class FileUtil {
 	 * Método responsável por copiar o conteúdo de um {@link MultipartFile} para o diretório temporário.
 	 * 
 	 * @param file conteúdo que será copiado
+	 * @param dataFormatada data formatada
 	 * @return arquivo copiado para o diretório temporário
 	 * @throws AssinaturaException
 	 */
-	public static final File copiarArquivoParaDiretorioTemporario(MultipartFile file) throws AssinaturaException {
-		File saveFile = new File(getTempDir(), file.getOriginalFilename());
+	public static final File copiarArquivoParaDiretorioTemporario(MultipartFile file, String dataFormatada) throws AssinaturaException {
+		File saveFile = new File(getTempDir(), dataFormatada + "_" + file.getOriginalFilename());
 		FileOutputStream output = null;
 		try {
 			output = new FileOutputStream(saveFile);

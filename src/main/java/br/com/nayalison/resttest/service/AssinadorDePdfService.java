@@ -2,7 +2,6 @@ package br.com.nayalison.resttest.service;
 
 import java.io.File;
 import java.security.NoSuchAlgorithmException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,6 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import br.com.nayalison.resttest.assinador.AssinadorHash;
 import br.com.nayalison.resttest.exception.AssinaturaException;
+import br.com.nayalison.resttest.model.Resposta;
+import br.com.nayalison.resttest.service.util.DateUtil;
 import br.com.nayalison.resttest.service.util.FileUtil;
 import br.com.nayalison.resttest.service.util.HashUtil;
 
@@ -33,29 +34,29 @@ public class AssinadorDePdfService {
 	}
 	
 	@RequestMapping(method = RequestMethod.POST)
-	public String assinar(@Param("cpf") String cpf, @RequestParam("file") MultipartFile file, HttpServletRequest request) {
+	public Resposta assinar(@Param("cpf") String cpf, @RequestParam("file") MultipartFile file, HttpServletRequest request) {
 		String mensagem = null;
+		String hash = null;
 		String ip = null;
 		
 		try {
+			String dataFormatada =  DateUtil.formatarDataHoraMinutosSegundos(new Date());
 			ip = getEnderecoIp(request);
-			String hash = criarHash(cpf, new Date(), ip);
-			File arquivoTemp = FileUtil.copiarArquivoParaDiretorioTemporario(file);
+			hash = criarHash(cpf, dataFormatada, ip);
+			File arquivoTemp = FileUtil.copiarArquivoParaDiretorioTemporario(file, dataFormatada);
 			assinador.assinar(hash, arquivoTemp);
-			mensagem =  hash;
+			mensagem =  "Arquivo assinado com sucesso!";
 		} catch (NoSuchAlgorithmException e) {
 			mensagem = "Fala ao gerar o hash do arquivo";
 		} catch (AssinaturaException e) {
 			mensagem = e.getMessage();
 		}
 		
-		return mensagem;
+		return new Resposta(hash, mensagem);
 	}
 
-	private String criarHash(String cpf, Date data, String ip) throws NoSuchAlgorithmException {
-		SimpleDateFormat format = new SimpleDateFormat("ddMMyyyyHHmmss");
-		String dataformatada =  format.format(data);
-		return HashUtil.gerarHashMD5(cpf+dataformatada+ip);
+	private String criarHash(String cpf, String dataFormatada, String ip) throws NoSuchAlgorithmException {
+		return HashUtil.gerarHashMD5(cpf + dataFormatada + ip);
 	}
 
 	private String getEnderecoIp(HttpServletRequest request) {
